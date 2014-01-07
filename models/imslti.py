@@ -89,6 +89,14 @@ if consumer is not None:
     user = auth.get_or_create_user(userinfo, update_fields=['email', 'first_name', 'last_name', 'password'])
     if user is None : 
         lti_errors.append("Unable to create user record");
+    else:
+        # user exists; make sure course name and id are set
+        if not hasattr(user, 'course_name'):
+            user['course_name'] = 'pip'
+            user['course_id'] = 5
+            user['section'] = 2
+            user.update_record()
+
 
     print user, type(user)
     print "Logging in..."

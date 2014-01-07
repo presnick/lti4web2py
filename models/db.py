@@ -1,7 +1,7 @@
 from gluon.tools import Auth
 
 # Make sure to match this with the models/db.py in welcome we we share auth tables
-db = DAL('mysql://web2py:web2pypassword@localhost/web2py',pool_size=1,check_reserved=['all'])
+db = DAL('postgres://presnick:presnick@localhost/mydb', fake_migrate_all=False, check_reserved=['all'])
 
 auth = Auth(db)
 
