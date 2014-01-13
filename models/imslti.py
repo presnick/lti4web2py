@@ -100,6 +100,7 @@ if consumer is not None:
 
     print user, type(user)
     print "Logging in..."
+    auth.settings.expiration = 3600000
     auth.login_user(user)
     print "Logged in..."
     logged_in = True
