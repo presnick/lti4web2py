@@ -5,8 +5,8 @@ import uuid
 oauth = local_import('oauth',reload=True)
 oauth_store = local_import('oauth_store',reload=True)
 
-print "In imslti.py"
-print dict(request.vars)
+#print "In imslti.py"
+#print dict(request.vars)
 
 myrecord = None
 consumer = None
@@ -21,6 +21,7 @@ user_id = request.vars.get('user_id', None)
 last_name = request.vars.get('lis_person_name_family', None)
 first_name = request.vars.get('lis_person_name_given', None)
 email = request.vars.get('lis_person_contact_email_primary', None)
+
 
 if user_id is None :
     lti_errors.append("user_id is required for this tool to function")
@@ -39,7 +40,7 @@ else :
 key = request.vars.get('oauth_consumer_key', None)
 if key is not None:
     myrecord = db(db.lti_keys.consumer==key).select().first()
-    print myrecord, type(myrecord)
+#    print myrecord, type(myrecord)
     if myrecord is None :
         lti_errors.append("Could not find oauth_consumer_key")
 
@@ -47,7 +48,7 @@ if myrecord is not None :
     masterapp = myrecord.application
     if len(masterapp) < 1 :
         masterapp = 'welcome'
-    print "masterapp",masterapp
+#    print "masterapp",masterapp
     session.connect(request, response, masterapp=masterapp, db=db)
 
     oauth_server = oauth.OAuthServer(oauth_store.LTI_OAuthDataStore(myrecord.consumer,myrecord.secret))
@@ -60,7 +61,6 @@ if myrecord is not None :
     else :
         full_uri = 'http://'
     full_uri = full_uri + request.env.http_host + request.env.request_uri
-
     oauth_request = oauth.OAuthRequest.from_request('POST', full_uri, None, dict(request.vars))
 
     try:
@@ -83,26 +83,27 @@ if consumer is not None:
     # print db.auth_user.password.validate('1C5CHFA_enUS503US503')
     # pw = db.auth_user.password.validate('2C5CHFA_enUS503US503')[0];
     pw = db.auth_user.password.validate(str(uuid.uuid4()))[0];
-    print pw 
+#    print pw 
     userinfo['password'] = pw
-    print userinfo
+#    print userinfo
     user = auth.get_or_create_user(userinfo, update_fields=['email', 'first_name', 'last_name', 'password'])
     if user is None : 
         lti_errors.append("Unable to create user record");
     else:
-        # user exists; make sure course name and id are set
-        if not hasattr(user, 'course_name'):
-            user['course_name'] = 'pip'
-            user['course_id'] = 5
-            user['section'] = 2
+        # user exists; make sure course name and id are set based on custom parameters passed, if this is for runestone
+        course_id = request.vars.get('custom_course_id', None)
+        section_id = request.vars.get('custom_section_id', None)
+        if course_id:
+            user['course_id'] = course_id
+            user['section'] = section_id
             user.update_record()
 
-
-    print user, type(user)
-    print "Logging in..."
+#    print user, type(user)
+#    print "Logging in..."
     auth.settings.expiration = 3600000
+
     auth.login_user(user)
-    print "Logged in..."
+#    print "Logged in..."
     logged_in = True
 
 

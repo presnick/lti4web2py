@@ -1,7 +1,8 @@
 from gluon.tools import Auth
+import local_config
 
 # Make sure to match this with the models/db.py in welcome we we share auth tables
-db = DAL('postgres://presnick:presnick@localhost/mydb', fake_migrate_all=False, check_reserved=['all'])
+db = DAL(local_config.db_string,pool_size=1,check_reserved=['all'])
 
 auth = Auth(db)
 
