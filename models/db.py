@@ -1,8 +1,8 @@
 from gluon.tools import Auth
-import local_config
 
 # Make sure to match this with the models/db.py in welcome we we share auth tables
-db = DAL(local_config.db_string,pool_size=1,check_reserved=['all'])
+# settings.database_uri is set in 1.py, the local config file
+db = DAL(settings.database_uri,pool_size=1,check_reserved=['all'])
 
 auth = Auth(db)
 
