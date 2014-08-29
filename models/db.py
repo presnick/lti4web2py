@@ -16,8 +16,7 @@ db.define_table('courses',
   Field('term_start_date', 'date'),
   Field('institution', 'string'),
   Field('base_course', 'string'),
-  migrate='runestone_courses.table'
-)
+  migrate=False
 if db(db.courses.id > 0).isempty():
     db.courses.insert(course_name='boguscourse', term_start_date=datetime.date(2000, 1, 1)) # should be id 1
     db.courses.insert(course_name='thinkcspy', term_start_date=datetime.date(2000, 1, 1))
@@ -37,7 +36,7 @@ db.define_table('cohort_master',
   Field('is_active','integer', #0 - deleted / inactive. 1 - active
   writable=False,readable=False),
   Field('course_name', 'string'),
-  migrate='runestone_cohort_master.table'
+  migrate=False
   )
 if db(db.cohort_master.id > 0).isempty():
     db.cohort_master.insert(cohort_name='Default Group', is_active = 1)
@@ -76,7 +75,7 @@ db.define_table('auth_user',
     Field('course_name',compute=lambda row: getCourseNameFromId(row.course_id)),
 #    format='%(username)s',
     format=lambda u: u.first_name + " " + u.last_name,
-    migrate='runestone_auth_user.table')
+    migrate=False)
 
 
 db.auth_user.first_name.requires = IS_NOT_EMPTY(error_message=auth.messages.is_empty)
