@@ -64,9 +64,9 @@ if myrecord is not None :
     oauth_request = oauth.OAuthRequest.from_request('POST', full_uri, None, dict(request.vars))
 
     try:
-        print "Incoming request from:", full_uri
+#        print "Incoming request from:", full_uri
         consumer, token, params = oauth_server.verify_request(oauth_request)
-        print "Verified."
+#        print "Verified."
     except oauth.OAuthError, err:
         oauth_error = "OAuth Security Validation failed:"+err.message
         lti_errors.append(oauth_error)
@@ -93,10 +93,14 @@ if consumer is not None:
         # user exists; make sure course name and id are set based on custom parameters passed, if this is for runestone
         course_id = request.vars.get('custom_course_id', None)
         section_id = request.vars.get('custom_section_id', None)
+        course_name = request.vars.get('custom_course_name', None)
         if course_id:
             user['course_id'] = course_id
             user['section'] = section_id
+            user['course_name'] = course_name
             user.update_record()
+#            print user
+
 
 #    print user, type(user)
 #    print "Logging in..."

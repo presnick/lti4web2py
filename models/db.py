@@ -2,12 +2,48 @@ from gluon.tools import Auth
 
 # Make sure to match this with the models/db.py in welcome we we share auth tables
 # settings.database_uri is set in 1.py, the local config file
-db = DAL(settings.database_uri,pool_size=1,check_reserved=['all'])
+db = DAL(settings.database_uri,pool_size=1,check_reserved=['postgres'])
 
 auth = Auth(db)
 
+##################
 ##This is a kludge; need to copy the custom definition of auth_user from runestone/models/db.py, so that it will be able to insert user's course_id and section_id properly
 ##Also had to include a copy of db_sections.py from the runestone app; have to keep that in sync with what's there.
+
+def getCourseNameFromId(courseid):
+    ''' used to compute auth.user.course_name field '''
+    if courseid == 1: # boguscourse
+        return ''
+    else:
+        q = db.courses.id == courseid
+        course_name = db(q).select()[0].course_name
+        return course_name
+
+
+def verifyInstructorStatus(course, instructor):
+    """
+    Make sure that the instructor specified is actually an instructor for the
+    given course.
+    """
+    if type(course) == str:
+        course = db(db.courses.course_name == course).select(db.courses.id).first()
+
+    return db((db.course_instructor.course == course) &
+             (db.course_instructor.instructor == instructor)
+            ).count() > 0
+
+class IS_COURSE_ID:
+    ''' used to validate that a course name entered (e.g. devcourse) corresponds to a
+        valid course ID (i.e. db.courses.id) '''
+    def __init__(self, error_message='Unknown course name. Please see your instructor.'):
+        self.e = error_message
+
+    def __call__(self, value):
+        if db(db.courses.course_name == value).select():
+            return (db(db.courses.course_name == value).select()[0].id, None)
+        return (value, self.e)
+
+
 
 ## create all tables needed by auth if not custom tables
 db.define_table('courses',
@@ -16,7 +52,7 @@ db.define_table('courses',
   Field('term_start_date', 'date'),
   Field('institution', 'string'),
   Field('base_course', 'string'),
-  migrate=False
+  migrate=False)
 if db(db.courses.id > 0).isempty():
     db.courses.insert(course_name='boguscourse', term_start_date=datetime.date(2000, 1, 1)) # should be id 1
     db.courses.insert(course_name='thinkcspy', term_start_date=datetime.date(2000, 1, 1))
